@@ -5,7 +5,7 @@
 <div class="container-fluid">
 
     <!-- Page Heading -->
-    <div class="container mt-3">
+    <div class="container mt-4">
         <h5 class="text-secondary">
             Dashboard Operator
         </h5>
@@ -13,16 +13,13 @@
             Selamat Datang, Operator
         </h2>
         <div class="row mt-4">
-            <div class="col-md-3 mb-3">
-                <div class="card bg-info text-white text-center">
+            <!-- Card Produk -->
+            <div class="col-md-3 mb-4">
+                <div class="card shadow-sm bg-info text-white text-center">
                     <div class="card-body">
-                        <img alt="Icon for Produk" class="img-fluid mb-3" src="https://storage.googleapis.com/a1aa/image/mONTBLg6wHZoFZD4ZnJtzJbLHpJ0A2J42ZuAqu9r4X1ixVfJA.jpg" style="width: 50px; height: 50px;" />
-                        <h5 class="card-title">
-                            Produk
-                        </h5>
-                        <p class="card-text">
-                            Manajemen Produk
-                        </p>
+                        <i class="fas fa-box fa-3x mb-3"></i>
+                        <h5 class="card-title">Produk</h5>
+                        <p class="card-text">Manajemen Produk</p>
                     </div>
                     <div class="card-footer bg-transparent border-0">
                         <a href="#" class="text-white text-decoration-none">
@@ -31,16 +28,13 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="card bg-success text-white text-center">
+            <!-- Card Transaksi -->
+            <div class="col-md-3 mb-4">
+                <div class="card shadow-sm bg-success text-white text-center">
                     <div class="card-body">
-                        <img alt="Icon for Transaksi" class="img-fluid mb-3" src="https://storage.googleapis.com/a1aa/image/EKnHKBICQBp4K18YfxehJfqeqNamYhuaVpuyMmh4XBGDZc1PB.jpg" style="width: 50px; height: 50px;" />
-                        <h5 class="card-title">
-                            Transaksi
-                        </h5>
-                        <p class="card-text">
-                            Manajemen halaman berita
-                        </p>
+                        <i class="fas fa-money-bill-wave fa-3x mb-3"></i>
+                        <h5 class="card-title">Transaksi</h5>
+                        <p class="card-text">Manajemen Halaman Berita</p>
                     </div>
                     <div class="card-footer bg-transparent border-0">
                         <a href="#" class="text-white text-decoration-none">
@@ -49,16 +43,13 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="card bg-warning text-white text-center">
+            <!-- Card Mitra -->
+            <div class="col-md-3 mb-4">
+                <div class="card shadow-sm bg-warning text-white text-center">
                     <div class="card-body">
-                        <img alt="Icon for Mitra" class="img-fluid mb-3" src="https://storage.googleapis.com/a1aa/image/et4xyzfADgnJbUkOqKMSYsbD4zx9aiQ3lYhkmeF66hexYc1PB.jpg" style="width: 50px; height: 50px;" />
-                        <h5 class="card-title">
-                            Mitra
-                        </h5>
-                        <p class="card-text">
-                            Manajemen Mitra Usaha
-                        </p>
+                        <i class="fas fa-handshake fa-3x mb-3"></i>
+                        <h5 class="card-title">Mitra</h5>
+                        <p class="card-text">Manajemen Mitra Usaha</p>
                     </div>
                     <div class="card-footer bg-transparent border-0">
                         <a href="#" class="text-white text-decoration-none">
@@ -67,16 +58,13 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="card bg-danger text-white text-center">
+            <!-- Card Konten -->
+            <div class="col-md-3 mb-4">
+                <div class="card shadow-sm bg-danger text-white text-center">
                     <div class="card-body">
-                        <img alt="Icon for Konten" class="img-fluid mb-3" src="https://storage.googleapis.com/a1aa/image/PBz2L9ZnpK7kN1rHB6AhBLIlgRJJYYacXM02uSyquiqjxVfJA.jpg" style="width: 50px; height: 50px;" />
-                        <h5 class="card-title">
-                            Konten
-                        </h5>
-                        <p class="card-text">
-                            Manajemen Konten
-                        </p>
+                        <i class="fas fa-file-alt fa-3x mb-3"></i>
+                        <h5 class="card-title">Konten</h5>
+                        <p class="card-text">Manajemen Konten</p>
                     </div>
                     <div class="card-footer bg-transparent border-0">
                         <a href="#" class="text-white text-decoration-none">

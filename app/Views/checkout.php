@@ -71,24 +71,27 @@
                         <!-- Courier Selection -->
                         <div class="mt-4">
                             <h5>Courier Selection</h5>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="courier" id="jne" value="jne" checked>
-                                <label class="form-check-label" for="jne">
-                                    JNE
-                                </label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="courier" id="jt" value="jt">
-                                <label class="form-check-label" for="jt">
-                                    J&T Express
-                                </label>
-                            </div>
+                            <?php if (isset($kurir) && $kurir): ?>
+                                <div class="border p-3 rounded">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="courier" id="selected-courier" value="<?= $kurir->kurir_id ?>" checked>
+                                        <label class="form-check-label" for="selected-courier">
+                                            <?= esc($kurir->nama_kurir) ?> - Rp<?= number_format($ongkir, 0, ',', '.') ?>
+                                        </label>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <p class="text-danger">Kurir belum dipilih. Silakan kembali ke keranjang untuk memilih kurir.</p>
+                            <?php endif; ?>
+                            <input type="hidden" name="ongkir" value="<?= esc($ongkir) ?>">
                         </div>
+
                     </form>
                 </div>
             </div>
         </div>
 
+        <!-- Order Summary -->
         <!-- Order Summary -->
         <div class="col-md-4">
             <div class="card">
@@ -99,21 +102,17 @@
                             <span>Subtotal</span>
                             <span>Rp<?= number_format($cart->total(), 0, ',', '.'); ?></span>
                         </li>
-                        <?php
-                        $shipping = 20000; // Ongkos kirim default
-                        $total = $cart->total() + $shipping;
-                        ?>
                         <li class="list-group-item d-flex justify-content-between">
                             <span>Shipping Fee</span>
-                            <span>Rp<?= number_format($shipping, 0, ',', '.'); ?></span>
+                            <span>Rp<?= number_format($ongkir, 0, ',', '.'); ?></span>
                         </li>
                     </ul>
                     <hr>
                     <div class="d-flex justify-content-between mb-3">
                         <h5>Total</h5>
-                        <h5>Rp<?= number_format($total, 0, ',', '.'); ?></h5>
+                        <h5>Rp<?= number_format($cart->total() + $ongkir, 0, ',', '.'); ?></h5>
                     </div>
-                    <button type="submit" form="checkout-form" id="placeOrderButton" class="btn btn-dark w-100  ">
+                    <button type="submit" form="checkout-form" id="placeOrderButton" class="btn btn-dark w-100">
                         Place Order <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
@@ -138,7 +137,7 @@
 
             // Ambil data form
             const formData = new FormData(checkoutForm);
-            formData.append('total', <?= $total; ?>); // Kirim total ke server
+            formData.append('total', <?= $cart->total() + $ongkir ?>); // Kirim total ke server
 
             // Kirim data ke server untuk mendapatkan Snap Token
             fetch('/checkout/process', {

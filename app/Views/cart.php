@@ -85,19 +85,33 @@
                 <div class="card-body">
                     <h5 class="card-title fw-bold mb-4">Order Summary</h5>
                     <div class="mb-4">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Subtotal</span>
-                            <span class="fw-bold"><?= number_to_currency($subtotal, 'IDR') ?></span>
-                        </div>
+                        <label class="form-label">Pilih Kurir</label>
+                        <select name="kurir_id" class="form-select">
+                            <option value="">Pilih Kurir</option>
+                            <?php foreach ($kurirs as $kurir): ?>
+                                <option value="<?= $kurir['kurir_id'] ?>" <?= session()->get('ongkir') == $kurir['ongkos_kirim'] ? 'selected' : '' ?>>
+                                    <?= $kurir['nama_kurir'] ?> - <?= number_to_currency($kurir['ongkos_kirim'], 'IDR') ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal</span>
+                        <span class="fw-bold"><?= number_to_currency($subtotal, 'IDR') ?></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Ongkos Kirim</span>
+                        <span class="fw-bold"><?= number_to_currency($ongkir, 'IDR') ?></span>
                     </div>
 
                     <div class="border-top pt-3 mb-4">
                         <div class="d-flex justify-content-between">
                             <span class="h5 mb-0">Total</span>
-                            <span class="h5 mb-0"><?= number_to_currency($subtotal, 'IDR') ?></span>
+                            <span class="h5 mb-0"><?= number_to_currency($subtotal + $ongkir, 'IDR') ?></span>
                         </div>
                     </div>
-
                     <div class="d-grid gap-2">
                         <button class="btn btn-primary btn-lg" type="submit">
                             Update Cart

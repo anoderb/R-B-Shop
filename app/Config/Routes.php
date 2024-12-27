@@ -95,3 +95,16 @@ $routes->get('homepage/remove/(:any)', 'HomePageController::remove/$1');
 $routes->get('admin/produk/export-excel', 'Admin\ProdukController::exportExcel');
 $routes->get('admin/produk/export-csv', 'Admin\ProdukController::exportCSV');
 $routes->get('admin/produk/export-pdf', 'Admin\ProdukController::exportPDF');
+
+$routes->get('admin/transaksi/export-excel', 'Admin\TransaksiController::exportExcel');
+$routes->get('admin/transaksi/export-csv', 'Admin\TransaksiController::exportCSV');
+$routes->get('admin/transaksi/export-pdf', 'Admin\TransaksiController::exportPDF');
+
+
+
+$routes->get('admin/transaksi/detail/(:num)', 'Admin\TransaksiController::detail/$1');
+
+
+
+
+

@@ -8,5 +8,5 @@ class PembelianModel extends Model
 {
     protected $table = 'pembelian';
     protected $primaryKey = 'Pembelian_id';
-    protected $allowedFields = ['tanggal', 'user_id', 'status', 'transaction_id', 'grand_total'];
+    protected $allowedFields = ['tanggal', 'user_id', 'status', 'transaction_id', 'kurir_id', 'grand_total'];
 }

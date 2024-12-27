@@ -4,28 +4,33 @@ namespace App\Controllers;
 
 use App\Models\HomePageModel;
 use App\Models\ProdukModel;
-
+use App\Models\KategoriModel;
 
 class HomePageController extends BaseController
 {
     protected $homePageModel;
+    protected $kategoriModel;
+
     public function __construct()
     {
-
         $this->homePageModel = new HomePageModel();
+        $this->kategoriModel = new KategoriModel();
         helper('number');
         helper('form');
     }
+
     public function index()
     {
         $keyword = $this->request->getVar('search'); // Ambil keyword dari query string
         $data = [
             'title' => 'Home Page',
             'barang' => $this->homePageModel->searchBarang($keyword), // Panggil metode searchBarang dengan keyword
+            'kategori' => $this->kategoriModel->findAll(), // Ambil semua kategori dari database
             'cart' => \Config\Services::cart(),
         ];
         return view('homepage', $data);
     }
+
 
     //shoping cart
 
@@ -95,8 +100,15 @@ class HomePageController extends BaseController
     public function cart()
     {
         $cart = \Config\Services::cart();
+        $db = \Config\Database::connect();
 
-        // Hitung subtotal
+        // Initialize ongkir session if not set
+        if (!session()->has('ongkir')) {
+            session()->set('ongkir', 0);
+        }
+
+        $kurirs = $db->table('kurir')->get()->getResultArray();
+
         $subtotal = 0;
         foreach ($cart->contents() as $item) {
             $subtotal += $item['price'] * $item['qty'];
@@ -106,8 +118,8 @@ class HomePageController extends BaseController
             'title' => 'Cart',
             'cart' => $cart,
             'subtotal' => $subtotal,
-            'discount_rate' => 0.2,
-            'delivery_fee' => 15000
+            'kurirs' => $kurirs,
+            'ongkir' => session()->get('ongkir')
         ];
         return view('cart', $data);
     }
@@ -116,26 +128,37 @@ class HomePageController extends BaseController
     {
         $cart = \Config\Services::cart();
         $i = 1;
-
+        $kurir_id = $this->request->getPost('kurir_id');
+    
+        if ($kurir_id) {
+            $db = \Config\Database::connect();
+            $kurir = $db->table('kurir')->where('kurir_id', $kurir_id)->get()->getRow();
+    
+            if ($kurir) {
+                session()->set('kurir_id', $kurir_id);
+                session()->set('ongkir', $kurir->ongkos_kirim);
+            }
+        }
+    
         foreach ($cart->contents() as $key => $value) {
             $rowid = $this->request->getPost('rowid' . $i);
             $qty = $this->request->getPost('qty' . $i);
-
+    
             if ($qty > 0) {
                 $cart->update([
                     'rowid' => $rowid,
-                    'qty'   => $qty
+                    'qty' => $qty
                 ]);
             } else {
-                // If quantity is 0, remove the item
                 $cart->remove($rowid);
             }
             $i++;
         }
-
+    
         session()->setFlashdata('pesan', 'Cart berhasil diupdate!');
         return redirect()->to(base_url('homepage/cart'));
     }
+    
 
     // public function delete(){
     //     $cart = \Config\Services::cart();
@@ -171,4 +194,6 @@ class HomePageController extends BaseController
 
         return view('productdetail', $data);
     }
+
+
 }

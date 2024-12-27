@@ -16,7 +16,13 @@ class ProdukModel extends Model
         $this->like('Kode_produk', $keyword);
         $this->orLike('nama_produk', $keyword);
         $this->orLike('harga', $keyword);
-        
+
         return $this; // Kembalikan instance model
+    }
+
+    // Ganti ini di ProdukModel
+    public function getKategori()
+    {
+        return $this->db->table('produk_kategori')->get()->getResultArray();
     }
 }

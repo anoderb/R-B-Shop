@@ -26,20 +26,27 @@ class CheckoutController extends BaseController
     }
 
     public function index()
-    {
-        $userId = user()->id; // Mengambil ID pengguna yang sedang login
-        $pelanggan = $this->pelangganModel->where('User_id', $userId)->first(); // Ambil data pelanggan dari model PelangganModel
+{
+    $userId = user()->id;
+    $pelanggan = $this->pelangganModel->where('User_id', $userId)->first();
 
-        $data = [
-            'title' => 'Checkout',
-            'cart' => $this->cart,
-            'user' => user(),
-            'pelanggan' => $pelanggan,
-            'cartItems' => 'gggggggggggg', // Kirimkan data pelanggan ke view
-        ];
+    // Ambil data dari sesi
+    $kurir_id = session()->get('kurir_id');
+    $ongkir = session()->get('ongkir');
+    $db = \Config\Database::connect();
+    $kurir = $kurir_id ? $db->table('kurir')->where('kurir_id', $kurir_id)->get()->getRow() : null;
 
-        return view('checkout', $data);
-    }
+    $data = [
+        'title' => 'Checkout',
+        'pelanggan' => $pelanggan,
+        'kurir' => $kurir,
+        'ongkir' => $ongkir,
+        'cart' => $this->cart,
+    ];
+
+    return view('checkout', $data);
+}
+
 
     public function process()
     {
@@ -48,6 +55,7 @@ class CheckoutController extends BaseController
             'alamat' => 'required',
             'kota' => 'required',
             'hp' => 'required',
+            
 
         ])) {
             // Jika validasi gagal, kirim respons JSON
@@ -55,14 +63,19 @@ class CheckoutController extends BaseController
         }
 
         try {
-            // Simpan data pembelian
+            // Ambil kurir_id dari session
+            $kurirId = session()->get('kurir_id'); 
+    
+            // Simpan Data pembelian
             $pembelianData = [
                 'tanggal' => date('Y-m-d H:i:s'),
                 'user_id' => user()->id,
                 'status' => 'pending',
+                'kurir_id' => $kurirId // Tambah kurir_id
             ];
+            
             $pembelianId = $this->pembelianModel->insert($pembelianData, true);
-
+    
             if (!$pembelianId) {
                 return $this->response->setJSON(['error' => 'Gagal menyimpan data pembelian.']);
             }
@@ -82,10 +95,13 @@ class CheckoutController extends BaseController
             \Midtrans\Config::$is3ds = true;
 
             // Generate Snap Token dari Midtrans
-            $midtrans = new \Midtrans\Snap(); // Pastikan library Midtrans di-load
+            $ongkir = session()->get('ongkir');
+    
+            // Update konfigurasi Midtrans
+            $midtrans = new \Midtrans\Snap();
             $transactionDetails = [
                 'order_id' => 'ORDER-' . time(),
-                'gross_amount' => $this->cart->total() + 20000, // Subtotal + Shipping
+                'gross_amount' => $this->cart->total() + $ongkir, // Menggunakan ongkir dari session
             ];
             $params = [
                 'transaction_details' => $transactionDetails,
@@ -133,7 +149,8 @@ class CheckoutController extends BaseController
         $dataToUpdate = [
             'transaction_id' => $transactionId,
             'grand_total' => $grossAmount,
-            'status' => $status
+            'status' => $status,
+            'kurir_id' => session()->get('kurir_id')
         ];
 
 

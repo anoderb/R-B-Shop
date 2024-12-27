@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
     <div class="container">
-        <a class="navbar-brand fw-bold fs-4" href="/">R&BSHOP</a>
+        <a class="navbar-brand fw-bold fs-4" href="/homepage">R&BSHOP</a>
         <button aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbarNav" data-bs-toggle="collapse" type="button">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -11,11 +11,23 @@
                         Kategori
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="kategoriDropdown">
-                        <li><a class="dropdown-item" href="#">Kategori 1</a></li>
-                        <li><a class="dropdown-item" href="#">Kategori 2</a></li>
-                        <li><a class="dropdown-item" href="#">Kategori 3</a></li>
-                        <li><a class="dropdown-item" href="#">Kategori 4</a></li>
+                        <?php if (!empty($kategori)): ?>
+                            <?php foreach ($kategori as $kat): ?>
+                                <li>
+                                    <a class="dropdown-item" href="/produk?kategori=<?= urlencode($kat['nama_kategori']) ?>">
+                                        <?= esc($kat['nama_kategori']) ?>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <li>
+                                <a class="dropdown-item" href="/login">Silahkan Login Terlebih dahulu</a>
+                            </li>
+                        <?php endif; ?>
                     </ul>
+
+
+
                 </li>
                 <li class="nav-item"><a class="nav-link" href="#">Diskon</a></li>
                 <li class="nav-item"><a class="nav-link" href="#">Brands</a></li>

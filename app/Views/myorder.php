@@ -50,7 +50,7 @@
                             <h5 class="card-title">Order #<?= $order['Pembelian_id']; ?></h5>
                             <p class="card-text">Status:
                                 <span class="badge <?= $order['status'] === 'success' || $order['status'] === 'completed' ? 'bg-success' : 'bg-danger'; ?>">
-                                    <?= $order['status'] === 'success' || $order['status'] === 'completed' ? 'Successfully Delivered' : 'Cancelled'; ?>
+                                    <?= $order['status'] === 'success' || $order['status'] === 'completed' ? 'Successfull Payment' : 'Cancelled'; ?>
                                 </span>
                             </p>
                             <p class="card-text">Items:</p>
