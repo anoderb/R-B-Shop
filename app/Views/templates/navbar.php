@@ -25,9 +25,6 @@
                             </li>
                         <?php endif; ?>
                     </ul>
-
-
-
                 </li>
                 <li class="nav-item"><a class="nav-link" href="#">Diskon</a></li>
                 <li class="nav-item"><a class="nav-link" href="#">Brands</a></li>

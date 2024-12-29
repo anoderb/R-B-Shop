@@ -65,6 +65,15 @@
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            <?php if ($transaksi['status'] === 'completed'): ?>
+                <div class="mt-3">
+                    <form action="<?= base_url('admin/transaksi/ship/' . $transaksi['Pembelian_id']) ?>" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-shipping-fast"></i> Ship Order
+                        </button>
+                    </form>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>

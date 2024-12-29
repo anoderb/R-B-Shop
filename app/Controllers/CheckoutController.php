@@ -6,6 +6,7 @@ use App\Models\PembelianModel;
 use App\Models\PembelianDetailModel;
 use App\Models\PelangganModel;
 use Myth\Auth\Models\UserModel;
+use App\Models\KategoriModel;
 
 
 use CodeIgniter\Controller;
@@ -16,6 +17,7 @@ class CheckoutController extends BaseController
     protected $pembelianModel;
     protected $pembelianDetailModel;
     protected $pelangganModel;
+    protected $kategoriModel;
 
     public function __construct()
     {
@@ -23,29 +25,31 @@ class CheckoutController extends BaseController
         $this->pembelianModel = new PembelianModel();
         $this->pembelianDetailModel = new PembelianDetailModel();
         $this->pelangganModel = new PelangganModel();
+        $this->kategoriModel = new KategoriModel();
     }
 
     public function index()
-{
-    $userId = user()->id;
-    $pelanggan = $this->pelangganModel->where('User_id', $userId)->first();
+    {
+        $userId = user()->id;
+        $pelanggan = $this->pelangganModel->where('User_id', $userId)->first();
 
-    // Ambil data dari sesi
-    $kurir_id = session()->get('kurir_id');
-    $ongkir = session()->get('ongkir');
-    $db = \Config\Database::connect();
-    $kurir = $kurir_id ? $db->table('kurir')->where('kurir_id', $kurir_id)->get()->getRow() : null;
+        // Ambil data dari sesi
+        $kurir_id = session()->get('kurir_id');
+        $ongkir = session()->get('ongkir');
+        $db = \Config\Database::connect();
+        $kurir = $kurir_id ? $db->table('kurir')->where('kurir_id', $kurir_id)->get()->getRow() : null;
+        $kategori = $this->kategoriModel->findAll();
+        $data = [
+            'title' => 'Checkout',
+            'pelanggan' => $pelanggan,
+            'kurir' => $kurir,
+            'ongkir' => $ongkir,
+            'cart' => $this->cart,
+            'kategori' => $kategori,
+        ];
 
-    $data = [
-        'title' => 'Checkout',
-        'pelanggan' => $pelanggan,
-        'kurir' => $kurir,
-        'ongkir' => $ongkir,
-        'cart' => $this->cart,
-    ];
-
-    return view('checkout', $data);
-}
+        return view('checkout', $data);
+    }
 
 
     public function process()
@@ -55,7 +59,7 @@ class CheckoutController extends BaseController
             'alamat' => 'required',
             'kota' => 'required',
             'hp' => 'required',
-            
+
 
         ])) {
             // Jika validasi gagal, kirim respons JSON
@@ -64,8 +68,8 @@ class CheckoutController extends BaseController
 
         try {
             // Ambil kurir_id dari session
-            $kurirId = session()->get('kurir_id'); 
-    
+            $kurirId = session()->get('kurir_id');
+
             // Simpan Data pembelian
             $pembelianData = [
                 'tanggal' => date('Y-m-d H:i:s'),
@@ -73,9 +77,9 @@ class CheckoutController extends BaseController
                 'status' => 'pending',
                 'kurir_id' => $kurirId // Tambah kurir_id
             ];
-            
+
             $pembelianId = $this->pembelianModel->insert($pembelianData, true);
-    
+
             if (!$pembelianId) {
                 return $this->response->setJSON(['error' => 'Gagal menyimpan data pembelian.']);
             }
@@ -96,7 +100,7 @@ class CheckoutController extends BaseController
 
             // Generate Snap Token dari Midtrans
             $ongkir = session()->get('ongkir');
-    
+
             // Update konfigurasi Midtrans
             $midtrans = new \Midtrans\Snap();
             $transactionDetails = [
@@ -130,21 +134,20 @@ class CheckoutController extends BaseController
 
     public function complete()
     {
-
         $orderId = (int) $this->request->getPost('order_id');
         $transactionId = $this->request->getPost('transaction_id');
         $grossAmount = (int) $this->request->getPost('gross_amount');
         $transactionStatus = $this->request->getPost('transaction_status');
-
+    
         $status = 'pending';
         if ($transactionStatus == 'settlement') {
-            $status = 'completed';
+            $status = 'completed'; // Ubah dari 'completed' ke 'shipped'
         } elseif ($transactionStatus == 'pending') {
             $status = 'pending';
         } else {
             $status = 'failed';
         }
-
+    
         // Data yang akan diperbarui
         $dataToUpdate = [
             'transaction_id' => $transactionId,
@@ -152,12 +155,11 @@ class CheckoutController extends BaseController
             'status' => $status,
             'kurir_id' => session()->get('kurir_id')
         ];
-
-
-        // // Lakukan update berdasarkan order_id
+    
+        // Lakukan update berdasarkan order_id
         $this->pembelianModel->update(['Pembelian_id' => $orderId], $dataToUpdate);
-
-        // // Redirect ke halaman sukses
+    
+        // Redirect ke halaman sukses
         return redirect()->to(base_url('/myorder'))->with('message', 'Transaksi berhasil.');
     }
 
@@ -181,34 +183,44 @@ class CheckoutController extends BaseController
                 $order['total_harga'] += $item['harga'] * $item['qty'];
             }
         }
-
+        $kategori = $this->kategoriModel->findAll();
         $data = [
             'title' => 'My Orders',
             'orders' => $orders,
+            'kategori' => $kategori,
         ];
 
         return view('myorder', $data);
     }
 
 
-
-
     public function updateStatus($orderId, $status)
     {
-        // Validasi status
-        $validStatuses = ['cancelled', 'completed'];
+        // Validasi status yang diperbolehkan
+        $validStatuses = ['cancelled', 'completed', 'delivered'];
         if (!in_array($status, $validStatuses)) {
             return redirect()->back()->with('error', 'Status tidak valid.');
         }
 
+        // Jika status cancelled, set status di database menjadi failed
+        $dbStatus = $status;
+        if ($status === 'cancelled') {
+            $dbStatus = 'failed';
+        }
+
         // Perbarui status di database
-        $update = $this->pembelianModel->update($orderId, ['status' => $status]);
+        $update = $this->pembelianModel->update($orderId, ['status' => $dbStatus]);
 
         if (!$update) {
             return redirect()->back()->with('error', 'Gagal memperbarui status.');
         }
 
-        $message = $status === 'cancelled' ? 'Pesanan berhasil dibatalkan.' : 'Pesanan berhasil diselesaikan.';
-        return redirect()->to('/myorder')->with('completed', $message);
+        $messages = [
+            'cancelled' => 'Pesanan berhasil dibatalkan.',
+            'completed' => 'Pesanan berhasil diselesaikan.',
+            'delivered' => 'Pesanan telah diterima.'
+        ];
+
+        return redirect()->to('/myorder')->with('success', $messages[$status]);
     }
 }

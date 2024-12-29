@@ -141,16 +141,23 @@ class TransaksiController extends Controller
 
         $db = \Config\Database::connect();
         $detail_produk = $db->table('Pembelian_detail')
-    ->select('Pembelian_detail.*, produk.nama_produk, produk.harga, Pembelian_detail.qty')
-    ->join('produk', 'produk.Produk_id = Pembelian_detail.Produk_id')
-    ->where('Pembelian_id', $id)
-    ->get()
-    ->getResultArray();
+            ->select('Pembelian_detail.*, produk.nama_produk, produk.harga, Pembelian_detail.qty')
+            ->join('produk', 'produk.Produk_id = Pembelian_detail.Produk_id')
+            ->where('Pembelian_id', $id)
+            ->get()
+            ->getResultArray();
 
 
         return view('admin/transaksi_detail', [
             'transaksi' => $transaksi,
             'detail_produk' => $detail_produk
         ]);
+    }
+    public function ship($id)
+    {
+        // Update status to shipped
+        $this->transaksiModel->update($id, ['status' => 'shipped']);
+
+        return redirect()->back()->with('message', 'Order has been marked as shipped.');
     }
 }

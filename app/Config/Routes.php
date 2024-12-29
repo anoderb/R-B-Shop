@@ -6,56 +6,52 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
+// Home Routes
 $routes->get('/', 'HomeController::index');
-// $routes->get('/home', 'HomeController::index');
+$routes->get('/home', 'HomeController::index', ['filter' => 'role:user']);
 $routes->get('/cart', 'HomeController::cart');
-// $routes->get('/category', 'HomeController::category');
 $routes->get('/productdetail', 'HomeController::productdetail');
-// $routes->get('/checkout', 'HomeController::checkout');
 $routes->get('/ordersukses', 'HomeController::ordersukses');
 
-$routes->get('/myorder', 'CheckoutController::myOrders');
-$routes->post('/checkout/update-status/(:num)/(:alpha)', 'CheckoutController::updateStatus/$1/$2');
-
-
+// Checkout Routes
 $routes->get('/checkout', 'CheckoutController::index');
 $routes->post('/checkout/process', 'CheckoutController::process');
 $routes->post('/checkout/complete', 'CheckoutController::complete');
+$routes->get('/myorder', 'CheckoutController::myOrders');
+$routes->post('/checkout/update-status/(:num)/(:alpha)', 'CheckoutController::updateStatus/$1/$2');
 
+// Payment Routes
 $routes->get('/payment', 'PaymentController::index');
 
-
-
+// User Profile Routes
 $routes->get('/profile', 'UserController::userprofile');
-$routes->post('/user/update', 'UserController::update');
-$routes->get('/user/update', 'UserController::update');
 $routes->post('/user/updateProfile', 'UserController::updateProfile');
 $routes->post('/user/updatePhoto', 'UserController::updatePhoto');
 
-
-
-
-
+// Authentication Routes
 $routes->get('/login', 'AuthController::login');
 $routes->get('/register', 'AuthController::register');
-$routes->get('/dashboard', 'Admin\DashboardController::index');
 
-
+// Restrict access for Admin Dashboard Routes
+$routes->get('/dashboard', 'Admin\DashboardController::index', ['filter' => 'role:admin']);
 $routes->get('/admin', 'Admin\DashboardController::index', ['filter' => 'role:admin']);
-$routes->get('/home', 'HomeController::index', ['filter' => 'role:user']);
 
+// Admin Produk Routes with Role Admin Access
+$routes->group('admin/produk', ['namespace' => 'App\Controllers\Admin', 'filter' => 'role:admin'], function ($routes) {
+    $routes->get('/', 'ProdukController::index');
+    $routes->get('detail/(:num)', 'ProdukController::detail/$1');
+    $routes->get('edit/(:num)', 'ProdukController::edit/$1');
+    $routes->post('update/(:num)', 'ProdukController::update/$1');
+    $routes->get('delete/(:num)', 'ProdukController::delete/$1');
+    $routes->get('tambah', 'ProdukController::tambah');
+    $routes->post('save', 'ProdukController::save');
+    $routes->get('export-excel', 'ProdukController::exportExcel');
+    $routes->get('export-csv', 'ProdukController::exportCSV');
+    $routes->get('export-pdf', 'ProdukController::exportPDF');
+});
 
-
-$routes->get('admin/produk', 'Admin\ProdukController::index');
-$routes->get('admin/produk/detail/(:num)', 'Admin\ProdukController::detail/$1');
-$routes->get('admin/produk/edit/(:num)', 'Admin\ProdukController::edit/$1');
-$routes->get('admin/produk/delete/(:num)', 'Admin\ProdukController::delete/$1');
-$routes->get('admin/produk/tambah', 'Admin\ProdukController::tambah');
-$routes->post('admin/produk/save', 'Admin\ProdukController::save');
-$routes->get('admin/produk/edit/(:num)', 'Admin\ProdukController::edit/$1');
-$routes->post('admin/produk/update/(:num)', 'Admin\ProdukController::update/$1');
-
-$routes->group('admin/kategori', ['namespace' => 'App\Controllers\Admin'], function ($routes) {
+// Admin Kategori Routes with Role Admin Access
+$routes->group('admin/kategori', ['namespace' => 'App\Controllers\Admin', 'filter' => 'role:admin'], function ($routes) {
     $routes->get('/', 'KategoriController::index');
     $routes->get('create', 'KategoriController::create');
     $routes->post('store', 'KategoriController::store');
@@ -64,47 +60,31 @@ $routes->group('admin/kategori', ['namespace' => 'App\Controllers\Admin'], funct
     $routes->get('delete/(:num)', 'KategoriController::delete/$1');
 });
 
+// Admin Transaksi Routes with Role Admin Access
+$routes->group('admin/transaksi', ['namespace' => 'App\Controllers\Admin', 'filter' => 'role:admin'], function ($routes) {
+    $routes->get('/', 'TransaksiController::index');
+    $routes->get('detail/(:num)', 'TransaksiController::detail/$1');
+    $routes->post('ship/(:num)', 'TransaksiController::ship/$1');
+    $routes->get('export-excel', 'TransaksiController::exportExcel');
+    $routes->get('export-csv', 'TransaksiController::exportCSV');
+    $routes->get('export-pdf', 'TransaksiController::exportPDF');
+});
 
-$routes->get('/admin/transaksi', 'Admin\TransaksiController::index');
+// Admin Metadata Routes with Role Admin Access
+$routes->post('admin/metadata/delete/(:num)', 'Admin\MetadataController::delete/$1', ['filter' => 'role:admin']);
 
+// Produk Routes
+$routes->get('/produk', 'ControllerProduk::index');
+$routes->get('/produk/(:segment)', 'HomePageController::produkDetail/$1');
 $routes->get('/category', 'ControllerProduk::index');
 
-
-$routes->post('admin/metadata/delete/(:num)', 'Admin\MetadataController::delete/$1');
-
-// routes.php
-$routes->get('/produk', 'ControllerProduk::index');
-// $routes->get('/produk/(:segment)', 'ControllerProduk::detail/$1');
-$routes->get('/produk/(:segment)', 'HomePageController::produkDetail/$1');
-
-
-
-
-
-$routes->get('/homepage', 'HomePageController::index');
-$routes->get('/homepage/cek', 'HomePageController::cek');
-$routes->post('/homepage/add', 'HomePageController::add');
-$routes->post('/homepage/update', 'HomePageController::update');
-$routes->get('/homepage/clear', 'HomePageController::clear');
-
-
-$routes->get('/homepage/cart', 'HomePageController::cart');
-$routes->get('homepage/remove/(:any)', 'HomePageController::remove/$1');
-
-
-$routes->get('admin/produk/export-excel', 'Admin\ProdukController::exportExcel');
-$routes->get('admin/produk/export-csv', 'Admin\ProdukController::exportCSV');
-$routes->get('admin/produk/export-pdf', 'Admin\ProdukController::exportPDF');
-
-$routes->get('admin/transaksi/export-excel', 'Admin\TransaksiController::exportExcel');
-$routes->get('admin/transaksi/export-csv', 'Admin\TransaksiController::exportCSV');
-$routes->get('admin/transaksi/export-pdf', 'Admin\TransaksiController::exportPDF');
-
-
-
-$routes->get('admin/transaksi/detail/(:num)', 'Admin\TransaksiController::detail/$1');
-
-
-
-
-
+// Homepage Routes
+$routes->group('homepage', function ($routes) {
+    $routes->get('/', 'HomePageController::index');
+    $routes->get('cek', 'HomePageController::cek');
+    $routes->post('add', 'HomePageController::add');
+    $routes->post('update', 'HomePageController::update');
+    $routes->get('clear', 'HomePageController::clear');
+    $routes->get('cart', 'HomePageController::cart');
+    $routes->get('remove/(:any)', 'HomePageController::remove/$1');
+});

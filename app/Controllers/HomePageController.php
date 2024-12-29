@@ -113,12 +113,13 @@ class HomePageController extends BaseController
         foreach ($cart->contents() as $item) {
             $subtotal += $item['price'] * $item['qty'];
         }
-
+        $kategori = $this->kategoriModel->findAll();
         $data = [
             'title' => 'Cart',
             'cart' => $cart,
             'subtotal' => $subtotal,
             'kurirs' => $kurirs,
+            'kategori' => $kategori,
             'ongkir' => session()->get('ongkir')
         ];
         return view('cart', $data);
@@ -185,11 +186,12 @@ class HomePageController extends BaseController
         if (!$produk) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Produk tidak ditemukan.');
         }
-
+        $kategori = $this->kategoriModel->findAll();
         $data = [
             'title' => 'Detail Produk',
             'produk' => $produk,
             'cart' => $cart,
+            'kategori' => $kategori,
         ];
 
         return view('productdetail', $data);

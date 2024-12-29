@@ -2,6 +2,18 @@
 <?= $this->section('content-user'); ?>
 
 <div class="container my-5">
+    <!-- Tampilkan pesan error/success -->
+    <?php if (session()->getFlashdata('error')) : ?>
+        <div class="alert alert-danger">
+            <?= session()->getFlashdata('error') ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('success')) : ?>
+        <div class="alert alert-success">
+            <?= session()->getFlashdata('success') ?>
+        </div>
+    <?php endif; ?>
     <h2 class="mb-4">User Profile</h2>
     <div class="row">
         <!-- Profile Information -->
