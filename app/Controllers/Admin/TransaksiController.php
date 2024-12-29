@@ -26,22 +26,9 @@ class TransaksiController extends Controller
         $currentPage = $this->request->getVar('page') ?? 1;
         $keyword = $this->request->getVar('keyword');
 
-        $builder = $this->transaksiModel->select('Pembelian.*, Users.username, Kurir.nama_kurir, Kurir.ongkos_kirim, (Pembelian.grand_total - Kurir.ongkos_kirim) AS nilai_total')
-            ->join('Users', 'Users.id = Pembelian.user_id', 'left')
-            ->join('Kurir', 'Kurir.kurir_id = Pembelian.kurir_id', 'left');
-
-        if ($keyword) {
-            $builder->groupStart()
-                ->like('Pembelian.Pembelian_id', $keyword)
-                ->orLike('Users.username', $keyword)
-                ->orLike('Pembelian.status', $keyword)
-                ->orLike('Kurir.nama_kurir', $keyword)
-                ->groupEnd();
-        }
-
         $data = [
-            'transaksi' => $builder->paginate($perPage),
-            'pager' => $builder->pager,
+            'transaksi' => $this->transaksiModel->getPaginatedTransaksi($perPage, $keyword),
+            'pager' => $this->transaksiModel->pager,
             'currentPage' => $currentPage,
             'keyword' => $keyword
         ];
@@ -136,17 +123,8 @@ class TransaksiController extends Controller
     }
     public function detail($id)
     {
-        $transaksiModel = new TransaksiModel();
-        $transaksi = $transaksiModel->getTransaksiById($id);
-
-        $db = \Config\Database::connect();
-        $detail_produk = $db->table('Pembelian_detail')
-            ->select('Pembelian_detail.*, produk.nama_produk, produk.harga, Pembelian_detail.qty')
-            ->join('produk', 'produk.Produk_id = Pembelian_detail.Produk_id')
-            ->where('Pembelian_id', $id)
-            ->get()
-            ->getResultArray();
-
+        $transaksi = $this->transaksiModel->getTransaksiById($id);
+        $detail_produk = $this->transaksiModel->getDetailProduk($id);
 
         return view('admin/transaksi_detail', [
             'transaksi' => $transaksi,
@@ -155,9 +133,7 @@ class TransaksiController extends Controller
     }
     public function ship($id)
     {
-        // Update status to shipped
-        $this->transaksiModel->update($id, ['status' => 'shipped']);
-
+        $this->transaksiModel->shipOrder($id);
         return redirect()->back()->with('message', 'Order has been marked as shipped.');
     }
 }

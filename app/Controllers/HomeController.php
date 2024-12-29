@@ -19,30 +19,30 @@ class HomeController extends BaseController
         ]);
     }
 
-    public function category(): string
-    {
-        return view('category', ['cart' => \Config\Services::cart()]);
-    }
+    // public function category(): string
+    // {
+    //     return view('category', ['cart' => \Config\Services::cart()]);
+    // }
 
-    public function productdetail(): string
-    {
-        return view('productdetail', ['cart' => \Config\Services::cart()]);
-    }
+    // public function productdetail(): string
+    // {
+    //     return view('productdetail', ['cart' => \Config\Services::cart()]);
+    // }
 
-    public function checkout(): string
-    {
-        return view('checkout', ['cart' => \Config\Services::cart()]);
-    }
+    // public function checkout(): string
+    // {
+    //     return view('checkout', ['cart' => \Config\Services::cart()]);
+    // }
 
-    public function ordersukses(): string
-    {
-        return view('ordersukses', ['cart' => \Config\Services::cart()]);
-    }
+    // public function ordersukses(): string
+    // {
+    //     return view('ordersukses', ['cart' => \Config\Services::cart()]);
+    // }
 
-    public function myorder(): string
-    {
-        return view('myorder', ['cart' => \Config\Services::cart()]);
-    }
+    // public function myorder(): string
+    // {
+    //     return view('myorder', ['cart' => \Config\Services::cart()]);
+    // }
 
     
 }

@@ -1,5 +1,5 @@
 <?php
-
+// app/Controllers/Admin/MetadataController.php
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
@@ -8,7 +8,6 @@ use App\Models\MetadataModel;
 class MetadataController extends BaseController
 {
     protected $metadataModel;
-
 
     // Di awal MetadataController constructor
     public function __construct()
@@ -24,6 +23,7 @@ class MetadataController extends BaseController
         // Log permission folder
         log_message('debug', 'Metadata upload folder permissions: ' . substr(sprintf('%o', fileperms($uploadPath)), -4));
     }
+
     public function save($produkId, $metadata, $allFiles)
     {
         log_message('debug', 'Starting metadata save process');
@@ -82,8 +82,8 @@ class MetadataController extends BaseController
                 // Debug data sebelum disimpan
                 log_message('debug', 'Saving metadata: ' . print_r($metadataData, true));
 
-                // Simpan ke database
-                $saved = $this->metadataModel->save($metadataData);
+                // Simpan ke database menggunakan model
+                $saved = $this->metadataModel->saveMetadata($metadataData);
 
                 if (!$saved) {
                     log_message('error', 'Failed to save metadata to database: ' . print_r($this->metadataModel->errors(), true));
@@ -94,11 +94,13 @@ class MetadataController extends BaseController
             }
         }
     }
+
     private function isValidImage($file)
     {
         $validTypes = ['image/jpeg', 'image/png', 'image/gif'];
         return in_array($file->getMimeType(), $validTypes);
     }
+
     public function delete($id)
     {
         if (!$this->request->isAJAX()) {
@@ -109,10 +111,8 @@ class MetadataController extends BaseController
         }
 
         try {
-            $metadataModel = new \App\Models\MetadataModel();
-
-            // Ambil data metadata
-            $metadata = $metadataModel->find($id);
+            // Ambil data metadata menggunakan model
+            $metadata = $this->metadataModel->getMetadataById($id);
 
             if (!$metadata) {
                 return $this->response->setStatusCode(404)->setJSON([
@@ -129,8 +129,8 @@ class MetadataController extends BaseController
                 }
             }
 
-            // Hapus data dari database
-            if ($metadataModel->delete($id)) {
+            // Hapus data metadata dari database
+            if ($this->metadataModel->deleteMetadata($id)) {
                 return $this->response->setJSON([
                     'success' => true,
                     'message' => 'Metadata berhasil dihapus'

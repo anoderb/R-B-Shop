@@ -7,17 +7,16 @@ use App\Models\ProdukModel;
 use App\Models\ProdukKategoriModel;
 use App\Controllers\Admin\MetadataController;
 use App\Models\SupplierModel;
+use App\Models\MetadataModel;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use TCPDF;
 
-//work
 class ProdukController extends BaseController
 {
     protected $produkModel;
-
     protected $db;
 
     public function __construct()
@@ -34,17 +33,9 @@ class ProdukController extends BaseController
 
         if ($keyword) {
             $this->produkModel->search($keyword);
-        } else {
-            $this->produkModel->search('');
         }
 
-        // Modifikasi query untuk mengambil data supplier dan kategori
-        $produk = $this->produkModel
-            ->select('produk.*, supplier.nama_suppl, produk_kategori.nama_kategori')
-            ->join('supplier', 'supplier.id_suppl = produk.id_suppl', 'left')
-            ->join('produk_kategori', 'produk_kategori.Kategori_id = produk.Kategori_id', 'left')
-            ->paginate($perPage);
-
+        $produk = $this->produkModel->getProdukWithRelations($perPage);
         $pager = $this->produkModel->pager;
 
         return view('admin/produk', [
@@ -55,38 +46,26 @@ class ProdukController extends BaseController
         ]);
     }
 
-
     public function tambah()
     {
         $kategoriModel = new ProdukKategoriModel();
-        $kategori = $kategoriModel->findAll();
         $supplierModel = new SupplierModel();
-        $supplier = $supplierModel->findAll();
-
 
         return view('admin/tambah_produk', [
-            'kategori' => $kategori,
-            'supplier' => $supplier // Pastikan nama variabel sesuai
+            'kategori' => $kategoriModel->findAll(),
+            'supplier' => $supplierModel->findAll(),
+            'metadata' => [] // Add empty metadata array for new products
         ]);
     }
 
     public function save()
     {
-        // Debug untuk melihat semua data yang diterima
-        $allFiles = $this->request->getFiles();
-        $allPost = $this->request->getPost();
-
-        log_message('debug', 'All Files: ' . print_r($allFiles, true));
-        log_message('debug', 'All Post: ' . print_r($allPost, true));
-
-        // Proses produk
         $fileGambar = $this->request->getFile('gambar');
+        $gambarName = '';
+        
         if ($fileGambar->isValid() && !$fileGambar->hasMoved()) {
             $fileGambar->move(FCPATH . 'uploads/produk');
             $gambarName = $fileGambar->getName();
-        } else {
-            $gambarName = '';
-            log_message('error', 'Error uploading main product image: ' . print_r($fileGambar->getError(), true));
         }
 
         $produkData = [
@@ -98,169 +77,128 @@ class ProdukController extends BaseController
             'Deskripsi' => $this->request->getPost('Deskripsi'),
             'gambar' => $gambarName,
             'id_suppl' => $this->request->getPost('id_suppl'),
-            'stok' => $this->request->getPost('stok'), // Tambahkan stok
+            'stok' => $this->request->getPost('stok'),
         ];
 
+        $produkId = $this->produkModel->createProduk($produkData);
 
-        $produkId = $this->produkModel->insert($produkData);
-
-        // Proses metadata
-        $metadata = $this->request->getPost('metadata');
-
-        if ($metadata) {
-            try {
-                $metadataController = new MetadataController();
-                $metadataController->save($produkId, $metadata, $allFiles);
-            } catch (\Exception $e) {
-                log_message('error', 'Error saving metadata: ' . $e->getMessage());
-                return redirect()->to('/admin/produk')->with('error', 'Error saving metadata: ' . $e->getMessage());
-            }
+        if ($metadata = $this->request->getPost('metadata')) {
+            $metadataController = new MetadataController();
+            $metadataController->save($produkId, $metadata, $this->request->getFiles());
         }
 
-        return redirect()->to('/admin/produk')->with('success', 'Produk dan metadata berhasil ditambahkan!');
+        return redirect()->to('/admin/produk')->with('success', 'Produk berhasil ditambahkan!');
     }
-
 
     public function edit($id)
     {
-        $produk = $this->produkModel->find($id);
-        if (!$produk) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Produk tidak ditemukan');
+        $result = $this->produkModel->getProdukWithMetadata($id);
+        if (!$result) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
 
         $kategoriModel = new ProdukKategoriModel();
-        $kategori = $kategoriModel->findAll();
-
-        // Get metadata for this product
-        $metadataModel = new \App\Models\MetadataModel();
-        $metadata = $metadataModel->where('Produk_id', $id)->findAll();
+        $supplierModel = new SupplierModel();
 
         return view('admin/edit_produk', [
-            'produk' => $produk,
-            'kategori' => $kategori,
-            'metadata' => $metadata
+            'produk' => $result['produk'],
+            'metadata' => $result['metadata'],
+            'kategori' => $kategoriModel->findAll(),
+            'supplier' => $supplierModel->findAll()
+        ]);
+    }
+
+    public function detail($id)
+    {
+        $result = $this->produkModel->getProdukWithMetadata($id);
+        if (!$result) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        return view('admin/detail_produk', [
+            'produk' => $result['produk'],
+            'metadata' => $result['metadata']
         ]);
     }
     public function update($id)
     {
-        if (!$this->validate([
-            'Kode_produk' => 'required',
-            'nama_produk' => 'required',
-            'Kategori_id' => 'required',
-            'id_suppl' => 'required',
-            'harga' => 'required|numeric',
-            'Berat' => 'required|numeric',
-            'stok' => 'required|numeric',
-            'gambar' => 'uploaded[gambar]|is_image[gambar]|max_size[gambar,1024]'
-        ])) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
-        }
-
-        // Handle main product image
-        $fileGambar = $this->request->getFile('gambar');
-        if ($fileGambar && $fileGambar->isValid() && !$fileGambar->hasMoved()) {
-            $fileGambar->move('uploads/produk');
-            $gambarName = $fileGambar->getName();
-        } else {
-            $gambarName = $this->request->getPost('old_gambar');
-        }
-
-        // Update product data
-        $data = [
-            'Kode_produk' => $this->request->getPost('Kode_produk'),
-            'nama_produk' => $this->request->getPost('nama_produk'),
-            'Kategori_id' => $this->request->getPost('Kategori_id'),
-            'harga' => $this->request->getPost('harga'),
-            'Berat' => $this->request->getPost('Berat'),
-            'Deskripsi' => $this->request->getPost('Deskripsi'),
-            'gambar' => $gambarName,
-            'stok' => $this->request->getPost('stok'),
-            'id_suppl' => $this->request->getPost('id_suppl'), // Tambahkan stok
-        ];
-
-
+        // Start database transaction
         $this->db->transStart();
 
         try {
-            // Update product
-            $this->produkModel->update($id, $data);
+            // Handle product image
+            $fileGambar = $this->request->getFile('gambar');
+            $gambarName = $this->request->getPost('old_gambar');
 
-            // Handle metadata updates
-            $metadata = $this->request->getPost('metadata');
-            $metadataModel = new \App\Models\MetadataModel();
+            if ($fileGambar && $fileGambar->isValid() && !$fileGambar->hasMoved()) {
+                $fileGambar->move(FCPATH . 'uploads/produk');
+                $gambarName = $fileGambar->getName();
 
-            if ($metadata) {
-                foreach ($metadata as $index => $meta) {
-                    $metadataData = [
-                        'Warna' => $meta['Warna'],
-                        'Ukuran' => $meta['Ukuran'],
-                        'Stok' => $meta['Stok'],
-                        'Harga' => $meta['Harga']
-                    ];
-
-                    // Handle metadata image
-                    $metaFile = $this->request->getFile('meta_gambar_' . $index);
-                    if ($metaFile && $metaFile->isValid() && !$metaFile->hasMoved()) {
-                        $metaFile->move('uploads/metadata');
-                        $metadataData['meta_gambar'] = $metaFile->getName();
-                    } elseif (isset($meta['old_meta_gambar'])) {
-                        $metadataData['meta_gambar'] = $meta['old_meta_gambar'];
-                    }
-
-                    if (isset($meta['Metadata_id'])) {
-                        // Update existing metadata
-                        $metadataModel->update($meta['Metadata_id'], $metadataData);
-                    } else {
-                        // Add new metadata
-                        $metadataData['Produk_id'] = $id;
-                        $metadataModel->insert($metadataData);
-                    }
+                // Delete old image if exists
+                $oldImage = $this->request->getPost('old_gambar');
+                if ($oldImage && file_exists(FCPATH . 'uploads/produk/' . $oldImage)) {
+                    unlink(FCPATH . 'uploads/produk/' . $oldImage);
                 }
             }
 
+            // Prepare product data
+            $produkData = [
+                'Kode_produk' => $this->request->getPost('Kode_produk'),
+                'nama_produk' => $this->request->getPost('nama_produk'),
+                'Kategori_id' => $this->request->getPost('Kategori_id'),
+                'harga' => $this->request->getPost('harga'),
+                'Berat' => $this->request->getPost('Berat'),
+                'Deskripsi' => $this->request->getPost('Deskripsi'),
+                'gambar' => $gambarName,
+                'stok' => $this->request->getPost('stok'),
+                'id_suppl' => $this->request->getPost('id_suppl'),
+            ];
+
+            // Update product
+            $this->produkModel->update($id, $produkData);
+
+            // Handle metadata updates
+            $metadata = $this->request->getPost('metadata');
+            if ($metadata) {
+                $metadataController = new MetadataController();
+                $allFiles = $this->request->getFiles();
+                $metadataController->save($id, $metadata, $allFiles);
+            }
+
+            // Complete transaction
             $this->db->transComplete();
 
             if ($this->db->transStatus() === false) {
-                return redirect()->back()->withInput()->with('error', 'Gagal memperbarui produk dan metadata.');
+                // An error occurred
+                return redirect()->back()
+                    ->with('error', 'Terjadi kesalahan saat memperbarui produk.')
+                    ->withInput();
             }
 
-            return redirect()->to('/admin/produk')->with('success', 'Produk dan metadata berhasil diperbarui!');
+            return redirect()->to('/admin/produk')
+                ->with('success', 'Produk berhasil diperbarui!');
+
         } catch (\Exception $e) {
+            // Roll back transaction on error
             $this->db->transRollback();
-            log_message('error', 'Error updating product and metadata: ' . $e->getMessage());
-            return redirect()->back()->withInput()->with('error', 'Terjadi kesalahan saat memperbarui produk dan metadata.');
+            log_message('error', 'Error updating product: ' . $e->getMessage());
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->withInput();
         }
     }
-    public function detail($id)
-    {
-        // Ambil data produk berdasarkan ID
-        $produk = $this->produkModel->find($id);
 
-        // Jika data produk tidak ditemukan
-        if (!$produk) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Produk dengan ID $id tidak ditemukan.");
-        }
-
-        // Load Metadata
-        $metadataModel = new \App\Models\MetadataModel();
-        $metadata = $metadataModel->where('Produk_id', $id)->findAll();
-
-        // Kirim data produk dan metadata ke view
-        return view('admin/detail_produk', [
-            'produk' => $produk,
-            'metadata' => $metadata
-        ]);
-    }
 
     public function delete($id)
     {
-        if ($this->produkModel->delete($id)) {
-            return redirect()->to('/admin/produk')->with('success', 'Produk berhasil dihapus!');
+        if ($this->produkModel->deleteProduk($id)) {
+            return redirect()->to('/admin/produk')
+                ->with('success', 'Produk berhasil dihapus!');
         }
-
-        return redirect()->back()->with('error', 'Gagal menghapus produk.');
+        return redirect()->back()
+            ->with('error', 'Gagal menghapus produk.');
     }
-
 
     // pagenation
     //EXPORT

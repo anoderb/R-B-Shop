@@ -59,34 +59,24 @@ class CheckoutController extends BaseController
             'alamat' => 'required',
             'kota' => 'required',
             'hp' => 'required',
-
-
         ])) {
-            // Jika validasi gagal, kirim respons JSON
             return $this->response->setJSON(['error' => 'Mohon lengkapi semua data.']);
         }
 
         try {
-            // Ambil kurir_id dari session
             $kurirId = session()->get('kurir_id');
 
-            // Simpan Data pembelian
             $pembelianData = [
                 'tanggal' => date('Y-m-d H:i:s'),
                 'user_id' => user()->id,
                 'status' => 'pending',
-                'kurir_id' => $kurirId // Tambah kurir_id
+                'kurir_id' => $kurirId
             ];
 
-            $pembelianId = $this->pembelianModel->insert($pembelianData, true);
+            $pembelianId = $this->pembelianModel->createOrder($pembelianData);
 
-            if (!$pembelianId) {
-                return $this->response->setJSON(['error' => 'Gagal menyimpan data pembelian.']);
-            }
-
-            // Simpan detail pembelian
             foreach ($this->cart->contents() as $item) {
-                $this->pembelianDetailModel->insert([
+                $this->pembelianDetailModel->createOrderDetails([
                     'Pembelian_id' => $pembelianId,
                     'Produk_id' => $item['id'],
                     'qty' => $item['qty'],
@@ -127,7 +117,6 @@ class CheckoutController extends BaseController
                 'redirectUrl' => base_url('/checkout/complete'), // Route tujuan setelah pembayaran selesai
             ]);
         } catch (\Exception $e) {
-            // Tangani error lain
             return $this->response->setJSON(['error' => $e->getMessage()]);
         }
     }
@@ -138,7 +127,7 @@ class CheckoutController extends BaseController
         $transactionId = $this->request->getPost('transaction_id');
         $grossAmount = (int) $this->request->getPost('gross_amount');
         $transactionStatus = $this->request->getPost('transaction_status');
-    
+
         $status = 'pending';
         if ($transactionStatus == 'settlement') {
             $status = 'completed'; // Ubah dari 'completed' ke 'shipped'
@@ -147,7 +136,7 @@ class CheckoutController extends BaseController
         } else {
             $status = 'failed';
         }
-    
+
         // Data yang akan diperbarui
         $dataToUpdate = [
             'transaction_id' => $transactionId,
@@ -155,10 +144,10 @@ class CheckoutController extends BaseController
             'status' => $status,
             'kurir_id' => session()->get('kurir_id')
         ];
-    
+
         // Lakukan update berdasarkan order_id
         $this->pembelianModel->update(['Pembelian_id' => $orderId], $dataToUpdate);
-    
+
         // Redirect ke halaman sukses
         return redirect()->to(base_url('/myorder'))->with('message', 'Transaksi berhasil.');
     }
@@ -167,27 +156,19 @@ class CheckoutController extends BaseController
     public function myOrders()
     {
         $userId = user()->id;
+        $orders = $this->pembelianModel->getUserOrders($userId);
 
-        // Ambil semua order berdasarkan user yang login
-        $orders = $this->pembelianModel->where('user_id', $userId)
-            ->orderBy('tanggal', 'DESC')
-            ->findAll();
-
-        // Ambil detail setiap pembelian dengan nama produk
         foreach ($orders as &$order) {
             $order['details'] = $this->pembelianDetailModel->getDetailsWithProduct($order['Pembelian_id']);
-
-            // Hitung total harga
-            $order['total_harga'] = 0;
-            foreach ($order['details'] as $item) {
-                $order['total_harga'] += $item['harga'] * $item['qty'];
-            }
+            $order['total_harga'] = array_reduce($order['details'], function($carry, $item) {
+                return $carry + ($item['harga'] * $item['qty']);
+            }, 0);
         }
-        $kategori = $this->kategoriModel->findAll();
+
         $data = [
             'title' => 'My Orders',
             'orders' => $orders,
-            'kategori' => $kategori,
+            'kategori' => $this->kategoriModel->findAll(),
         ];
 
         return view('myorder', $data);
@@ -196,22 +177,14 @@ class CheckoutController extends BaseController
 
     public function updateStatus($orderId, $status)
     {
-        // Validasi status yang diperbolehkan
         $validStatuses = ['cancelled', 'completed', 'delivered'];
         if (!in_array($status, $validStatuses)) {
             return redirect()->back()->with('error', 'Status tidak valid.');
         }
 
-        // Jika status cancelled, set status di database menjadi failed
-        $dbStatus = $status;
-        if ($status === 'cancelled') {
-            $dbStatus = 'failed';
-        }
-
-        // Perbarui status di database
-        $update = $this->pembelianModel->update($orderId, ['status' => $dbStatus]);
-
-        if (!$update) {
+        $dbStatus = ($status === 'cancelled') ? 'failed' : $status;
+        
+        if (!$this->pembelianModel->updateOrderStatus($orderId, ['status' => $dbStatus])) {
             return redirect()->back()->with('error', 'Gagal memperbarui status.');
         }
 

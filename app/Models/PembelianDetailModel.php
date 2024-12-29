@@ -10,7 +10,11 @@ class PembelianDetailModel extends Model
     protected $primaryKey = 'Pembelian_detail_id';
     protected $allowedFields = ['Pembelian_id', 'Produk_id', 'qty'];
 
-    // Tambahkan metode ini
+    public function createOrderDetails($data)
+    {
+        return $this->insert($data);
+    }
+
     public function getDetailsWithProduct($pembelianId)
     {
         return $this->db->table('pembelian_detail')

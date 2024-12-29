@@ -3,7 +3,6 @@
 namespace App\Controllers;
 
 use App\Models\HomePageModel;
-use App\Models\ProdukModel;
 use App\Models\KategoriModel;
 
 class HomePageController extends BaseController
@@ -15,111 +14,64 @@ class HomePageController extends BaseController
     {
         $this->homePageModel = new HomePageModel();
         $this->kategoriModel = new KategoriModel();
-        helper('number');
-        helper('form');
+        helper(['number', 'form']);
     }
 
     public function index()
     {
-        $keyword = $this->request->getVar('search'); // Ambil keyword dari query string
+        $keyword = $this->request->getVar('search');
         $data = [
             'title' => 'Home Page',
-            'barang' => $this->homePageModel->searchBarang($keyword), // Panggil metode searchBarang dengan keyword
-            'kategori' => $this->kategoriModel->findAll(), // Ambil semua kategori dari database
+            'barang' => $this->homePageModel->searchBarang($keyword),
+            'kategori' => $this->kategoriModel->getAllKategori(),
             'cart' => \Config\Services::cart(),
         ];
         return view('homepage', $data);
     }
 
-
-    //shoping cart
-
-
     public function cek()
     {
-        $cart = \Config\Services::cart();
-        $response = $cart->contents();
+        $response = $this->homePageModel->getCartContents();
         echo '<pre>';
         print_r($response);
         echo '</pre>';
     }
-    // Insert an shopping cart
-    // public function add()
-    // {
-    //     $cart = \Config\Services::cart();
-
-    //     // Menambahkan item ke keranjang
-    //     $cart->insert([
-    //         'id'      => $this->request->getPost('id'),
-    //         'qty'     => 1,
-    //         'price'   => $this->request->getPost('price'),
-    //         'name'    => $this->request->getPost('name'),
-    //         'options' => [
-    //             'berat'  => $this->request->getPost('berat'),
-    //             'gambar' => $this->request->getPost('gambar'),
-    //         ]
-    //     ]);
-
-    //     // Set flashdata untuk notifikasi
-    //     session()->setFlashdata('pesan', 'Barang berhasil ditambahkan ke keranjang!');
-
-    //     // Redirect ke halaman homepage
-    //     return redirect()->to(base_url('homepage'));
-    // }
 
     public function add()
     {
-        $cart = \Config\Services::cart();
-
-        // Menambahkan item ke keranjang
-        $cart->insert([
-            'id'      => $this->request->getPost('id'),
-            'qty'     => 1,
-            'price'   => $this->request->getPost('price'),
-            'name'    => $this->request->getPost('name'),
+        $this->homePageModel->addToCart([
+            'id' => $this->request->getPost('id'),
+            'qty' => 1,
+            'price' => $this->request->getPost('price'),
+            'name' => $this->request->getPost('name'),
             'options' => [
-                'berat'  => $this->request->getPost('berat'),
+                'berat' => $this->request->getPost('berat'),
                 'gambar' => $this->request->getPost('gambar'),
             ]
         ]);
 
-        // Set flashdata untuk notifikasi
         session()->setFlashdata('pesan', 'Barang berhasil ditambahkan ke keranjang!');
-
-        // Redirect ke halaman sebelumnya (referer)
         return redirect()->back();
     }
 
-
-    // delete an shopping cart
     public function clear()
     {
-        $cart = \Config\Services::cart();
-        $cart->destroy();
+        $this->homePageModel->clearCart();
+        return redirect()->back();
     }
+
     public function cart()
     {
-        $cart = \Config\Services::cart();
-        $db = \Config\Database::connect();
-
-        // Initialize ongkir session if not set
         if (!session()->has('ongkir')) {
             session()->set('ongkir', 0);
         }
 
-        $kurirs = $db->table('kurir')->get()->getResultArray();
-
-        $subtotal = 0;
-        foreach ($cart->contents() as $item) {
-            $subtotal += $item['price'] * $item['qty'];
-        }
-        $kategori = $this->kategoriModel->findAll();
         $data = [
             'title' => 'Cart',
-            'cart' => $cart,
-            'subtotal' => $subtotal,
-            'kurirs' => $kurirs,
-            'kategori' => $kategori,
+            'cart' => \Config\Services::cart(),
+            'subtotal' => $this->homePageModel->calculateSubtotal(),
+            'kurirs' => $this->homePageModel->getKurirs(),
+            'kategori' => $this->kategoriModel->getAllKategori(),
             'ongkir' => session()->get('ongkir')
         ];
         return view('cart', $data);
@@ -127,75 +79,61 @@ class HomePageController extends BaseController
 
     public function update()
     {
-        $cart = \Config\Services::cart();
-        $i = 1;
         $kurir_id = $this->request->getPost('kurir_id');
-    
+        
         if ($kurir_id) {
-            $db = \Config\Database::connect();
-            $kurir = $db->table('kurir')->where('kurir_id', $kurir_id)->get()->getRow();
-    
+            $kurir = $this->homePageModel->getKurirById($kurir_id);
             if ($kurir) {
-                session()->set('kurir_id', $kurir_id);
-                session()->set('ongkir', $kurir->ongkos_kirim);
+                session()->set([
+                    'kurir_id' => $kurir_id,
+                    'ongkir' => $kurir->ongkos_kirim
+                ]);
             }
         }
-    
+
+        $cart = \Config\Services::cart();
+        $i = 1;
         foreach ($cart->contents() as $key => $value) {
             $rowid = $this->request->getPost('rowid' . $i);
             $qty = $this->request->getPost('qty' . $i);
-    
+
             if ($qty > 0) {
-                $cart->update([
+                $this->homePageModel->updateCart([
                     'rowid' => $rowid,
                     'qty' => $qty
                 ]);
             } else {
-                $cart->remove($rowid);
+                $this->homePageModel->removeFromCart($rowid);
             }
             $i++;
         }
-    
+
         session()->setFlashdata('pesan', 'Cart berhasil diupdate!');
         return redirect()->to(base_url('homepage/cart'));
     }
-    
 
-    // public function delete(){
-    //     $cart = \Config\Services::cart();
-    //     $cart->remove('rowid');
-    //     return redirect()->to(base_url('homepage/cart'));
-    // }
     public function remove($rowid)
     {
-        $cart = \Config\Services::cart();
-        $cart->remove($rowid);
-
+        $this->homePageModel->removeFromCart($rowid);
         session()->setFlashdata('pesan', 'Barang berhasil dihapus dari keranjang!');
         return redirect()->to(base_url('homepage/cart'));
     }
 
     public function produkDetail($id)
     {
-        // Ambil detail produk berdasarkan ID
         $produk = $this->homePageModel->getBarang($id);
-        $cart = \Config\Services::cart();
-
-
-        // Jika produk tidak ditemukan, tampilkan halaman 404
+        
         if (!$produk) {
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Produk tidak ditemukan.');
         }
-        $kategori = $this->kategoriModel->findAll();
+
         $data = [
             'title' => 'Detail Produk',
             'produk' => $produk,
-            'cart' => $cart,
-            'kategori' => $kategori,
+            'cart' => \Config\Services::cart(),
+            'kategori' => $this->kategoriModel->getAllKategori(),
         ];
 
         return view('productdetail', $data);
     }
-
-
 }
