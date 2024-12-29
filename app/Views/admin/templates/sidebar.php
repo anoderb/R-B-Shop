@@ -1,11 +1,11 @@
-<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+<ul class="navbar-nav bg-gradient-dark sidebar sidebar-dark accordion shadow-lg" id="accordionSidebar">
 
     <!-- Sidebar - Brand -->
-    <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
-        <div class="sidebar-brand-icon rotate-n-15">
+    <a class="sidebar-brand d-flex align-items-center justify-content-center py-3" href="/">
+        <div class="sidebar-brand-icon rotate-n-15 text-light">
             <i class="fas fa-store"></i>
         </div>
-        <div class="sidebar-brand-text mx-3">RB Shop <sup>@</sup></div>
+        <div class="sidebar-brand-text mx-3 text-light">RB Shop <sup>@</sup></div>
     </a>
 
     <!-- Divider -->
@@ -13,7 +13,7 @@
 
     <!-- Nav Item - Dashboard -->
     <li class="nav-item">
-        <a class="nav-link" href="/dashboard">
+        <a class="nav-link text-light" href="/dashboard">
             <i class="fas fa-tachometer-alt"></i>
             <span>Dashboard</span>
         </a>
@@ -23,11 +23,11 @@
     <hr class="sidebar-divider">
 
     <!-- Heading -->
-    <div class="sidebar-heading">Manajemen</div>
+    <div class="sidebar-heading text-light">Manajemen</div>
 
     <!-- Nav Item - Produk Collapse Menu -->
     <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseProduk"
+        <a class="nav-link collapsed text-light" href="#" data-toggle="collapse" data-target="#collapseProduk"
             aria-expanded="false" aria-controls="collapseProduk">
             <i class="fas fa-box"></i>
             <span>Produk</span>
@@ -45,7 +45,7 @@
 
     <!-- Nav Item - Transaksi Collapse Menu -->
     <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTransaksi"
+        <a class="nav-link collapsed text-light" href="#" data-toggle="collapse" data-target="#collapseTransaksi"
             aria-expanded="false" aria-controls="collapseTransaksi">
             <i class="fas fa-money-check-alt"></i>
             <span>Transaksi</span>
@@ -62,7 +62,7 @@
 
     <!-- Nav Item - Mitra -->
     <li class="nav-item">
-        <a class="nav-link" href="/mitra">
+        <a class="nav-link text-light" href="/">
             <i class="fas fa-handshake"></i>
             <span>Mitra</span>
         </a>
@@ -70,7 +70,7 @@
 
     <!-- Nav Item - Konten Web -->
     <li class="nav-item">
-        <a class="nav-link" href="/konten">
+        <a class="nav-link text-light" href="/">
             <i class="fas fa-file-alt"></i>
             <span>Konten Web</span>
         </a>
@@ -79,8 +79,10 @@
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">
 
-    <!-- Sidebar Toggler (Sidebar) -->
+    <!-- Sidebar Toggler -->
     <div class="text-center d-none d-md-inline">
-        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+        <button class="rounded-circle border-0 bg-dark text-light" id="sidebarToggle"></button>
     </div>
 </ul>
+
+

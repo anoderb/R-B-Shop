@@ -1,60 +1,88 @@
 <?= $this->extend('auth/templates/index'); ?>
 
 <?= $this->section('content'); ?>
+<div class="login-container">
+    <div class="login-image-section">
+        <img class="background-image" 
+             src="https://storage.googleapis.com/a1aa/image/LxcTTsWnOT4OBJt6MxqgqUhiihyCWFvjk6y9YVUy0loFf37JA.jpg" 
+             alt="Register background">
+        <div class="login-image-content">
+            <h2>Join Our Community</h2>
+            <p>Create an account to start shopping and get access to exclusive offers.</p>
+        </div>
+    </div>
+    
+    <div class="login-form-section">
+        <?= view('Myth\Auth\Views\_message_block') ?>
 
-
-<div class="container">
-
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card o-hidden border-0 shadow-lg my-5">
-                <div class="card-body p-0">
-                    <!-- Nested Row within Card Body -->
-                    <div class="row">
-                        <div class="col-lg">
-                            <div class="p-5">
-                                <div class="text-center">
-                                    <h1 class="h4 text-gray-900 mb-4"><?= lang('Auth.register') ?></h1>
-                                </div>
-
-                                <?= view('Myth\Auth\Views\_message_block') ?>
-
-                                <form action="<?= url_to('register') ?>" method="post" class="user">
-                                    <?= csrf_field() ?>
-
-                                    <div class="form-group">
-                                        <input type="text" class="form-control form-control-user  <?php if (session('errors.username')) : ?>is-invalid<?php endif ?>" name="username"
-                                            placeholder="<?= lang('Auth.username') ?>" value="<?= old('username') ?>">
-                                    </div>
-                                    <div class="form-group">
-                                        <input type="email" class="form-control form-control-user" <?php if (session('errors.email')) : ?>is-invalid<?php endif ?> name="email"
-                                            placeholder="<?= lang('Auth.email') ?>" value="<?= old('email') ?>">
-                                    </div>
-
-                                    <div class="form-group row">
-                                        <div class="col-sm-6 mb-3 mb-sm-0">
-                                            <input type="password" class="form-control form-control-user <?php if (session('errors.password')) : ?>is-invalid<?php endif ?>"
-                                                name="password" placeholder="<?= lang('Auth.password') ?>" autocomplete="off">
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <input type="password" class="form-control form-control-user <?php if (session('errors.pass_confirm')) : ?>is-invalid<?php endif ?>"
-                                                name="pass_confirm" placeholder="<?= lang('Auth.repeatPassword') ?>" autocomplete="off"">
-                                        </div>
-                                    </div>
-                                    <button type=" submit" class="btn btn-primary btn-user btn-block">
-                                            <?= lang('Auth.register') ?>
-                                            </button>
-                                            <hr>
-                                            <div class="text-center">
-                                            <p><?=lang('Auth.alreadyRegistered')?> <a href="<?= url_to('login') ?>"><?=lang('Auth.signIn')?></a></p>
-                                            </div>
-                                        </div>
-                                    </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="login-header">
+            <h1>Create Account</h1>
+            <p>Fill in your details to register</p>
         </div>
 
-        <?= $this->endSection(); ?>
+        <form action="<?= url_to('register') ?>" method="post">
+            <?= csrf_field() ?>
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" 
+                       id="username"
+                       class="form-control <?php if (session('errors.username')) : ?>is-invalid<?php endif ?>"
+                       name="username"
+                       placeholder="Choose your username"
+                       value="<?= old('username') ?>">
+                <div class="invalid-feedback">
+                    <?= session('errors.username') ?>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" 
+                       id="email"
+                       class="form-control <?php if (session('errors.email')) : ?>is-invalid<?php endif ?>"
+                       name="email"
+                       placeholder="Enter your email"
+                       value="<?= old('email') ?>">
+                <div class="invalid-feedback">
+                    <?= session('errors.email') ?>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" 
+                       id="password"
+                       class="form-control <?php if (session('errors.password')) : ?>is-invalid<?php endif ?>"
+                       name="password"
+                       placeholder="Create a password"
+                       autocomplete="off">
+                <div class="invalid-feedback">
+                    <?= session('errors.password') ?>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="pass_confirm">Confirm Password</label>
+                <input type="password" 
+                       id="pass_confirm"
+                       class="form-control <?php if (session('errors.pass_confirm')) : ?>is-invalid<?php endif ?>"
+                       name="pass_confirm"
+                       placeholder="Repeat your password"
+                       autocomplete="off">
+                <div class="invalid-feedback">
+                    <?= session('errors.pass_confirm') ?>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login">Create Account</button>
+
+            <div class="divider"></div>
+            
+            <div class="register-link">
+                Already have an account? <a href="<?= url_to('login') ?>"><?=lang('Auth.signIn')?></a>
+            </div>
+        </form>
+    </div>
+</div>
+<?= $this->endSection(); ?>

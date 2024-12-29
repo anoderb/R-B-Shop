@@ -9,9 +9,6 @@ use CodeIgniter\Router\RouteCollection;
 // Home Routes
 $routes->get('/', 'HomeController::index');
 $routes->get('/home', 'HomeController::index', ['filter' => 'role:user']);
-$routes->get('/cart', 'HomeController::cart');
-$routes->get('/productdetail', 'HomeController::productdetail');
-$routes->get('/ordersukses', 'HomeController::ordersukses');
 
 // Checkout Routes
 $routes->get('/checkout', 'CheckoutController::index');
@@ -81,7 +78,7 @@ $routes->get('/category', 'ControllerProduk::index');
 // Homepage Routes
 $routes->group('homepage', function ($routes) {
     $routes->get('/', 'HomePageController::index');
-    $routes->get('cek', 'HomePageController::cek');
+    // $routes->get('cek', 'HomePageController::cek');
     $routes->post('add', 'HomePageController::add');
     $routes->post('update', 'HomePageController::update');
     $routes->get('clear', 'HomePageController::clear');

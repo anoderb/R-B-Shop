@@ -26,6 +26,7 @@ class CheckoutController extends BaseController
         $this->pembelianDetailModel = new PembelianDetailModel();
         $this->pelangganModel = new PelangganModel();
         $this->kategoriModel = new KategoriModel();
+        helper(['number', 'form']);
     }
 
     public function index()

@@ -3,76 +3,91 @@
 <?= $this->section('content-admin'); ?>
 <div class="container-fluid">
 
-    <h1 class="h3 mb-4 text-gray-800">Tambah Produk</h1>
+    <h1 class="h3 mb-4 text-primary">Tambah Produk</h1>
 
     <form action="/admin/produk/save" method="POST" enctype="multipart/form-data">
         <?= csrf_field(); ?>
 
-        <!-- Informasi Produk Utama -->
-        <div class="form-group">
-            <label for="Kode_produk">Kode Produk</label>
-            <input type="text" class="form-control" id="Kode_produk" name="Kode_produk" required>
+        <div class="row">
+            <!-- Informasi Produk -->
+            <div class="col-md-6">
+                <div class="card shadow-sm p-3">
+                    <h5 class="text-secondary">Informasi Produk</h5>
+                    <div class="form-group">
+                        <label for="Kode_produk"><i class="fas fa-barcode"></i> Kode Produk</label>
+                        <input type="text" class="form-control" id="Kode_produk" name="Kode_produk" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nama_produk"><i class="fas fa-tag"></i> Nama Produk</label>
+                        <input type="text" class="form-control" id="nama_produk" name="nama_produk" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="Kategori_id"><i class="fas fa-list"></i> Kategori</label>
+                        <select class="form-control" id="Kategori_id" name="Kategori_id" required>
+                            <?php foreach ($kategori as $item): ?>
+                                <option value="<?= $item['Kategori_id']; ?>"><?= $item['nama_kategori']; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_suppl"><i class="fas fa-truck"></i> Supplier</label>
+                        <select class="form-control" id="id_suppl" name="id_suppl" required>
+                            <?php foreach ($supplier as $item): ?>
+                                <option value="<?= $item['id_suppl']; ?>"><?= $item['nama_suppl']; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Harga dan Stok -->
+            <div class="col-md-6">
+                <div class="card shadow-sm p-3">
+                    <h5 class="text-secondary">Harga & Stok</h5>
+                    <div class="form-group">
+                        <label for="harga"><i class="fas fa-dollar-sign"></i> Harga Dasar</label>
+                        <input type="number" class="form-control" id="harga" name="harga" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="Berat"><i class="fas fa-weight"></i> Berat (kg)</label>
+                        <input type="number" class="form-control" id="Berat" name="Berat" step="any" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="stok"><i class="fas fa-box"></i> Stok</label>
+                        <input type="number" class="form-control" id="stok" name="stok" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gambar"><i class="fas fa-image"></i> Gambar Produk</label>
+                        <input type="file" class="form-control-file" id="gambar" name="gambar" required>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="nama_produk">Nama Produk</label>
-            <input type="text" class="form-control" id="nama_produk" name="nama_produk" required>
+        <!-- Deskripsi -->
+        <div class="card shadow-sm mt-4 p-3">
+            <h5 class="text-secondary">Deskripsi</h5>
+            <div class="form-group">
+                <label for="Deskripsi"><i class="fas fa-align-left"></i> Deskripsi Produk</label>
+                <textarea class="form-control" id="Deskripsi" name="Deskripsi"></textarea>
+            </div>
         </div>
-
-        <div class="form-group">
-            <label for="Kategori_id">Kategori</label>
-            <select class="form-control" id="Kategori_id" name="Kategori_id" required>
-                <?php foreach ($kategori as $item): ?>
-                    <option value="<?= $item['Kategori_id']; ?>"><?= $item['nama_kategori']; ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="id_suppl">Supplier</label>
-            <select class="form-control" id="id_suppl" name="id_suppl" required>
-                <?php foreach ($supplier as $item): ?>
-                    <option value="<?= $item['id_suppl']; ?>"><?= $item['nama_suppl']; ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="harga">Harga Dasar</label>
-            <input type="number" class="form-control" id="harga" name="harga" required>
-        </div>
-
-        <div class="form-group">
-            <label for="Berat">Berat (kg)</label>
-            <input type="number" class="form-control" id="Berat" name="Berat" step="any" required>
-        </div>
-
-        <div class="form-group">
-            <label for="Deskripsi">Deskripsi</label>
-            <textarea class="form-control" id="Deskripsi" name="Deskripsi"></textarea>
-        </div>
-        <div class="form-group">
-            <label for="stok">Stok</label>
-            <input type="number" class="form-control" id="stok" name="stok" required>
-        </div>
-
-        <div class="form-group">
-            <label for="gambar">Gambar Produk</label>
-            <input type="file" class="form-control" id="gambar" name="gambar" required>
-        </div>
-
-        <hr>
 
         <!-- Metadata -->
-        <h5 class="mt-4">Metadata (Opsional)</h5>
-        <div id="metadata-container">
-            <!-- Metadata forms will be appended here -->
+        <div class="card shadow-sm mt-4 p-3">
+            <h5 class="text-secondary">Metadata (Opsional)</h5>
+            <div id="metadata-container"></div>
+            <button type="button" id="add-metadata" class="btn btn-outline-secondary mt-2"><i class="fas fa-plus"></i> Tambah Metadata</button>
         </div>
-        <button type="button" id="add-metadata" class="btn btn-secondary mt-2">Add Metadata</button>
 
-        <button type="submit" class="btn btn-primary mt-4">Simpan</button>
-        <a href="/admin/produk" class="btn btn-secondary mt-4">Kembali</a>
+        <!-- Submit -->
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+            <a href="/admin/produk" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
+        </div>
     </form>
 </div>
+
 
 <script>
     // JavaScript untuk menambahkan/menghapus metadata
