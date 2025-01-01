@@ -50,7 +50,7 @@ class HomePageController extends BaseController
             ]
         ]);
 
-        session()->setFlashdata('pesan', 'Barang berhasil ditambahkan ke keranjang!');
+        session()->setFlashdata('success', 'Barang berhasil ditambahkan ke keranjang!');
         return redirect()->back();
     }
 
@@ -108,14 +108,14 @@ class HomePageController extends BaseController
             $i++;
         }
 
-        session()->setFlashdata('pesan', 'Cart berhasil diupdate!');
+        session()->setFlashdata('success', 'Cart berhasil diupdate!');
         return redirect()->to(base_url('homepage/cart'));
     }
 
     public function remove($rowid)
     {
         $this->homePageModel->removeFromCart($rowid);
-        session()->setFlashdata('pesan', 'Barang berhasil dihapus dari keranjang!');
+        session()->setFlashdata('success', 'Barang berhasil dihapus dari keranjang!');
         return redirect()->to(base_url('homepage/cart'));
     }
 

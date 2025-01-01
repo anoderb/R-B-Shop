@@ -1,6 +1,21 @@
 <?= $this->extend('admin/templates/index'); ?>
 <?= $this->section('content-admin'); ?>
 <div class="container-fluid">
+
+    <!-- Flash Message -->
+    <div class="alert-container">
+        <?php if (session()->getFlashdata('success')): ?>
+            <div class="custom-alert alert-success">
+                <div class="alert-content">
+                    <i class="fas fa-check-circle alert-icon"></i>
+                    <span class="alert-message"><?= session()->getFlashdata('success') ?></span>
+                </div>
+                <button class="alert-close">×</button>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Page Heading -->   
     <h1>Semua Produk</h1>
 
     <a href="/admin/produk/tambah" class="btn btn-primary mb-3" id="tambah-produk">+ Tambah Produk</a>
@@ -117,5 +132,108 @@
             width: 100%;
         }
     }
+
+    .alert-container {
+        position: fixed;
+        top: 80px;
+        /* Adjust this value based on your navbar height */
+        right: 2rem;
+        z-index: 1000;
+        max-width: 400px;
+    }
+
+    /* Rest of your existing alert styles remain the same */
+    .custom-alert {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .alert-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .alert-icon {
+        font-size: 1.25rem;
+        color: #10b981;
+    }
+
+    .alert-message {
+        color: #1f2937;
+        font-size: 0.95rem;
+    }
+
+    .alert-close {
+        background: none;
+        border: none;
+        color: #9ca3af;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0 0.5rem;
+        line-height: 1;
+    }
+
+    .alert-close:hover {
+        color: #4b5563;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+
+    .alert-hiding {
+        animation: slideOut 0.3s ease-in forwards;
+    }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const alerts = document.querySelectorAll('.custom-alert');
+
+        alerts.forEach(alert => {
+            // Close button functionality
+            const closeBtn = alert.querySelector('.alert-close');
+            closeBtn.addEventListener('click', () => {
+                alert.classList.add('alert-hiding');
+                setTimeout(() => alert.remove(), 300);
+            });
+
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                if (alert && document.body.contains(alert)) {
+                    alert.classList.add('alert-hiding');
+                    setTimeout(() => alert.remove(), 300);
+                }
+            }, 5000);
+        });
+    });
+</script>
 <?= $this->endSection(); ?>

@@ -58,7 +58,7 @@
                                 <td><?= $item['nama_kurir'] ?? 'N/A'; ?> Rp<?= number_format($item['ongkos_kirim'] ?? 0, 0, ',', '.'); ?></td>
                                 <td>Rp <?= number_format($item['grand_total'], 0, ',', '.'); ?></td>
                                 <td>
-                                    <a href="/admin/transaksi/detail/<?= $item['Pembelian_id']; ?>" class="btn btn-danger btn-sm">Detail</a>
+                                    <a href="/admin/transaksi/detail/<?= $item['Pembelian_id']; ?>" class="btn btn-dark btn-sm">Detail</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
