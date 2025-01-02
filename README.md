@@ -76,6 +76,7 @@ R-B Shop is an e-commerce web application built with CodeIgniter 4, featuring us
 ### 1. Authentication (Myth/Auth)
 
 - User registration and login
+- Multilogin User
 - Role-based access control
 - Remember me feature
 
@@ -121,16 +122,6 @@ database.default.hostname = localhost
 database.default.database = rb_shop
 database.default.username = your_username
 database.default.password = your_password
-```
-
-### Email Configuration (for password reset)
-
-```env
-email.fromEmail = your_email@domain.com
-email.fromName = 'R-B Shop'
-email.SMTPHost = your_smtp_host
-email.SMTPUser = your_smtp_user
-email.SMTPPass = your_smtp_password
 ```
 
 ## Usage
