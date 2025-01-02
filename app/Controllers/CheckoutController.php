@@ -84,10 +84,11 @@ class CheckoutController extends BaseController
                 ]);
             }
             // Konfigurasi Midtrans
-            \Midtrans\Config::$serverKey = 'SB-Mid-server-AoZtrXWQVeCymsD_SEwpPbRS';
-            \Midtrans\Config::$isProduction = false; // Ganti ke true jika di production
-            \Midtrans\Config::$isSanitized = true;
-            \Midtrans\Config::$is3ds = true;
+          
+            \Midtrans\Config::$serverKey = env('midtrans.serverKey');
+            \Midtrans\Config::$isProduction = (bool)env('midtrans.isProduction');
+            \Midtrans\Config::$isSanitized = (bool)env('midtrans.isSanitized');
+            \Midtrans\Config::$is3ds = (bool)env('midtrans.is3ds');
 
             // Generate Snap Token dari Midtrans
             $ongkir = session()->get('ongkir');
@@ -161,7 +162,7 @@ class CheckoutController extends BaseController
 
         foreach ($orders as &$order) {
             $order['details'] = $this->pembelianDetailModel->getDetailsWithProduct($order['Pembelian_id']);
-            $order['total_harga'] = array_reduce($order['details'], function($carry, $item) {
+            $order['total_harga'] = array_reduce($order['details'], function ($carry, $item) {
                 return $carry + ($item['harga'] * $item['qty']);
             }, 0);
         }
@@ -184,7 +185,7 @@ class CheckoutController extends BaseController
         }
 
         $dbStatus = ($status === 'cancelled') ? 'failed' : $status;
-        
+
         if (!$this->pembelianModel->updateOrderStatus($orderId, ['status' => $dbStatus])) {
             return redirect()->back()->with('error', 'Gagal memperbarui status.');
         }

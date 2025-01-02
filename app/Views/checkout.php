@@ -117,7 +117,7 @@
 </div>
 
 <!-- Include existing script from previous checkout page -->
-<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-jf9Jkm-Rly43CyXs"></script>
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="<?= env('midtrans.clientKey') ?>"></script>
 
 <style>
     .checkout-container {

@@ -1,68 +1,171 @@
-# CodeIgniter 4 Application Starter
+# R-B Shop
 
-## What is CodeIgniter?
+R-B Shop is an e-commerce web application built with CodeIgniter 4, featuring user authentication, payment integration with Midtrans, and reporting capabilities using PHPSpreadsheet and TCPDF.
 
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](https://codeigniter.com).
+## Features
 
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
+- User Authentication (Myth/Auth)
+- Product Management
+- Shopping Cart
+- Secure Payment Processing (Midtrans)
+- Order Management
+- PDF Report Generation (TCPDF)
+- Excel Report Export (PHPSpreadsheet)
+- Responsive Design
 
-More information about the plans for version 4 can be found in [CodeIgniter 4](https://forum.codeigniter.com/forumdisplay.php?fid=28) on the forums.
+## Prerequisites
 
-You can read the [user guide](https://codeigniter.com/user_guide/)
-corresponding to the latest version of the framework.
+- PHP >= 7.4
+- Composer
+- MySQL/MariaDB
+- Node.js (optional, for asset compilation)
+- Midtrans Account (for payment processing)
 
-## Installation & updates
+## Installation
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
+1. Clone the repository:
 
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+   ```bash
+   git clone https://github.com/anoderb/R-B-Shop.git
+   cd R-B-Shop
+   ```
 
-## Setup
+2. Install dependencies:
 
-Copy `env` to `.env` and tailor for your app, specifically the baseURL
-and any database settings.
+   ```bash
+   composer install
+   ```
 
-## Important Change with index.php
+3. Set up environment file:
 
-`index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
-for better security and separation of components.
+   - Copy `.env.example` to `.env`
+   - Configure your database settings
+   - Add Midtrans configuration:
 
-This means that you should configure your web server to "point" to your project's *public* folder, and
-not to the project root. A better practice would be to configure a virtual host to point there. A poor practice would be to point your web server to the project root and expect to enter *public/...*, as the rest of your logic and the
-framework are exposed.
+     ```env
+     # Midtrans Configuration
+     midtrans.serverKey = SB-Mid-server-AoZtrXWQVeCymsD_SEwpPbRS
+     midtrans.clientKey = SB-Mid-client-jf9Jkm-Rly43CyXs
+     midtrans.isProduction = false
+     midtrans.isSanitized = true
+     midtrans.is3ds = true
+     ```
 
-**Please** read the user guide for a better explanation of how CI4 works!
+4. Run database migrations:
 
-## Repository Management
+   ```bash
+   php spark migrate
+   ```
 
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
+5. Run database seeder (if available):
 
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
+   ```bash
+   php spark db:seed InitialSeeder
+   ```
 
-## Server Requirements
+## Core Dependencies
 
-PHP version 8.1 or higher is required, with the following extensions installed:
+- [CodeIgniter 4](https://codeigniter.com/): PHP web framework
+- [Myth/Auth](https://github.com/lonnieezell/myth-auth): Authentication system
+- [Midtrans PHP](https://github.com/Midtrans/midtrans-php): Payment gateway integration
+- [PHPSpreadsheet](https://github.com/PHPOffice/PhpSpreadsheet): Excel file generation
+- [TCPDF](https://github.com/tecnickcom/TCPDF): PDF file generation
 
-- [intl](http://php.net/manual/en/intl.requirements.php)
-- [mbstring](http://php.net/manual/en/mbstring.installation.php)
+## Key Features Explanation
 
-> [!WARNING]
-> - The end of life date for PHP 7.4 was November 28, 2022.
-> - The end of life date for PHP 8.0 was November 26, 2023.
-> - If you are still using PHP 7.4 or 8.0, you should upgrade immediately.
-> - The end of life date for PHP 8.1 will be December 31, 2025.
+### 1. Authentication (Myth/Auth)
 
-Additionally, make sure that the following extensions are enabled in your PHP:
+- User registration and login
+- Role-based access control
+- Remember me feature
 
-- json (enabled by default - don't turn it off)
-- [mysqlnd](http://php.net/manual/en/mysqlnd.install.php) if you plan to use MySQL
-- [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
+### 2. Payment Integration (Midtrans)
+
+- Secure payment processing
+- Multiple payment methods support
+- Transaction status handling
+
+### 3. Reporting
+
+- Generate PDF reports using TCPDF
+- Export data to Excel using PHPSpreadsheet
+- Various report formats available
+- Customizable templates
+
+## Directory Structure
+
+```
+R-B-Shop/
+├── app/
+│   ├── Config/
+│   ├── Controllers/
+│   ├── Models/
+│   └── Views/
+├── public/
+│   ├── assets/
+│   └── uploads/
+├── tests/
+├── vendor/
+├── composer.json
+└── .env
+```
+
+## Configuration
+
+### Database Setup
+
+Update the following in your `.env` file:
+
+```env
+database.default.hostname = localhost
+database.default.database = rb_shop
+database.default.username = your_username
+database.default.password = your_password
+```
+
+### Email Configuration (for password reset)
+
+```env
+email.fromEmail = your_email@domain.com
+email.fromName = 'R-B Shop'
+email.SMTPHost = your_smtp_host
+email.SMTPUser = your_smtp_user
+email.SMTPPass = your_smtp_password
+```
+
+## Usage
+
+### Running the Application
+
+```bash
+php spark serve
+```
+
+Access the application at `http://localhost:8080`
+
+### Admin Access
+
+- Default admin login:
+  - Email: admin@gmail.com
+  - Password: Bandulan112
+
+
+```bash
+composer test
+```
+
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+For support, please email support@rbshop.com or open an issue in the GitHub repository.
+
+## Credits
+
+- [Myth/Auth](https://github.com/lonnieezell/myth-auth)
+- [Midtrans](https://midtrans.com/)
+- [PHPSpreadsheet](https://phpspreadsheet.readthedocs.io/)
+- [TCPDF](https://tcpdf.org/)
